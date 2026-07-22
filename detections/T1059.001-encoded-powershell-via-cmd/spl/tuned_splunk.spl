@@ -1,0 +1,5 @@
+index=sysmon
+(Image="*\\powershell.exe" OR OriginalFileName="PowerShell.EXE")
+AND ParentImage="*\\cmd.exe"
+AND CommandLine="* -e*"
+| table UtcTime User ParentImage Image CommandLine ProcessGuid ProcessId

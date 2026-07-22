@@ -1,0 +1,48 @@
+title: Encoded PowerShell Command Execution via Command Prompt
+id: 5d1c7d3d-ec4f-4d5a-a7fd-6e5cbe1b6d01
+status: experimental
+description: >
+    Detects PowerShell launched from Command Prompt (cmd.exe) using a
+    Base64-encoded command via the -EncodedCommand parameter (or its
+    valid abbreviated forms -e/-enc/-encod, etc. -- PowerShell accepts any
+    unambiguous prefix of the full parameter name). This combination --
+    cmd.exe spawning an obfuscated PowerShell invocation -- is commonly
+    observed in post-exploitation activity and offensive tooling.
+    Validated using Atomic Red Team technique T1059.001 (test #17)
+    against Sysmon Event ID 1, Windows Security Event ID 4688, and
+    PowerShell Operational Event IDs 4103/4104.
+author: RootPi
+date: 2026-07-17
+modified: 2026-07-17
+references:
+    - https://attack.mitre.org/techniques/T1059/001/
+    - https://github.com/redcanaryco/atomic-red-team/blob/master/atomics/T1059.001/T1059.001.md
+    - https://github.com/SigmaHQ/sigma/blob/master/rules/windows/process_creation/proc_creation_win_powershell_base64_encoded_cmd.yml
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection_img:
+        - Image|endswith: '\powershell.exe'
+        - OriginalFileName: 'PowerShell.EXE'
+    selection_parent:
+        ParentImage|endswith: '\cmd.exe'
+    selection_encoded:
+        CommandLine|contains: ' -e'
+    condition: selection_img and selection_parent and selection_encoded
+fields:
+    - UtcTime
+    - User
+    - ParentImage
+    - Image
+    - CommandLine
+    - ProcessGuid
+    - ProcessId
+falsepositives:
+    - Administrative scripts using encoded PowerShell for legitimate automation
+    - Software deployment tools that wrap commands via cmd.exe (e.g. SCCM, PDQ Deploy)
+    - Scheduled tasks configured to run PowerShell through a cmd.exe wrapper
+level: high
+tags:
+    - attack.execution
+    - attack.t1059.001

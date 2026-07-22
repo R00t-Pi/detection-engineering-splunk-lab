@@ -1,0 +1,1 @@
+Image="*\\powershell.exe" OR OriginalFileName="PowerShell.EXE" ParentImage="*\\cmd.exe" CommandLine="* -e*" | table UtcTime,User,ParentImage,Image,CommandLine,ProcessGuid,ProcessId
